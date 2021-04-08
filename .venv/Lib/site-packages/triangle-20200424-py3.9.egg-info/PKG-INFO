@@ -1,0 +1,10 @@
+Metadata-Version: 1.0
+Name: triangle
+Version: 20200424
+Summary: Python binding to the triangle library
+Home-page: https://rufat.be/triangle
+Author: Dzhelil Rufat
+Author-email: d@rufat.be
+License: LGPLv3
+Description: UNKNOWN
+Platform: UNKNOWN

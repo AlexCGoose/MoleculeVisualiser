@@ -1,0 +1,17 @@
+Metadata-Version: 1.1
+Name: glu
+Version: 0.0.18
+Summary: Glue for DRY configurations
+Home-page: https://github.com/chongkong/glu
+Author: Park Jong Bin
+Author-email: chongkong94@gmail.com
+License: MIT
+Description: UNKNOWN
+Keywords: glue,glu,dry,config,dry-config,dry-configurable
+Platform: UNKNOWN
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 2
+Classifier: Programming Language :: Python :: 3
+Classifier: Development Status :: 2 - Pre-Alpha
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
