@@ -106,10 +106,9 @@ glfw.make_context_current(window)
 
 lightPos = [25, 25, 25]
 
-cam = [(math.pi/4), (math.pi/4), 10]
+cam = [(math.pi/4), (math.pi/4), 20]
 
 sphereI, sphereB = ObjLoader.load_model("sphere.obj")
-
 floorI, floorB = ObjLoader.load_model("floor.obj")
 
 shader = compileProgram(compileShader(
@@ -186,37 +185,15 @@ sphere_pos.append(pyrr.matrix44.create_from_translation(
     pyrr.Vector3([0, 0, 0])))
 
 sphere_scale = []
-sphere_scale.append(pyrr.matrix44.create_from_scale(
-    pyrr.Vector3([0.1, 0.1, 0.1])))
-sphere_scale.append(pyrr.matrix44.create_from_scale(
-    pyrr.Vector3([0.1, 0.1, 0.1])))
-sphere_scale.append(pyrr.matrix44.create_from_scale(
-    pyrr.Vector3([0.1, 0.1, 0.1])))
-sphere_scale.append(pyrr.matrix44.create_from_scale(
-    pyrr.Vector3([0.1, 0.1, 0.1])))
-sphere_scale.append(pyrr.matrix44.create_from_scale(
-    pyrr.Vector3([0.1, 0.1, 0.1])))
-sphere_scale.append(pyrr.matrix44.create_from_scale(
-    pyrr.Vector3([0.1, 0.1, 0.1])))
-sphere_scale.append(pyrr.matrix44.create_from_scale(
-    pyrr.Vector3([0.1, 0.1, 0.1])))
-sphere_scale.append(pyrr.matrix44.create_from_scale(
-    pyrr.Vector3([0.1, 0.1, 0.1])))
-sphere_scale.append(pyrr.matrix44.create_from_scale(
-    pyrr.Vector3([0.1, 0.1, 0.1])))
+for i in range(9):
+    sphere_scale.append(pyrr.matrix44.create_from_scale(
+        pyrr.Vector3([0.1, 0.1, 0.1])))
 sphere_scale.append(pyrr.matrix44.create_from_scale(
     pyrr.Vector3([0.2, 0.2, 0.2])))
 
 sphere_trans = []
-sphere_trans.append(pyrr.matrix44.create_identity)
-sphere_trans.append(pyrr.matrix44.create_identity)
-sphere_trans.append(pyrr.matrix44.create_identity)
-sphere_trans.append(pyrr.matrix44.create_identity)
-sphere_trans.append(pyrr.matrix44.create_identity)
-sphere_trans.append(pyrr.matrix44.create_identity)
-sphere_trans.append(pyrr.matrix44.create_identity)
-sphere_trans.append(pyrr.matrix44.create_identity)
-sphere_trans.append(pyrr.matrix44.create_identity)
+for i in range(9):
+    sphere_trans.append(pyrr.matrix44.create_identity)
 sphere_trans.append(pyrr.matrix44.create_from_translation(
     pyrr.Vector3([random.randrange(-20, 20)*0.0001, random.randrange(-20, 20)*0.0001, random.randrange(-20, 20)*0.0001])))
 
