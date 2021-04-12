@@ -15,16 +15,16 @@ class ObjLoader:
                 coordinates.append(int(d)-1)
 
     @staticmethod  # sorted vertex buffer for use with glDrawArrays function
-    def create_sorted_vertex_buffer(indices_data, vertices, textures, normals):
+    def create_sorted_vertex_buffer(indices_data, vertices, textures, normals, colour):
         for i, ind in enumerate(indices_data):
             if i % 3 == 0:  # sort the vertex coordinates
                 start = ind * 3
                 end = start + 3
                 ObjLoader.buffer.extend(vertices[start:end])
             elif i % 3 == 1:  # sort the texture coordinates
-                start = ind * 2
-                end = start + 2
-                ObjLoader.buffer.extend(textures[start:end])
+                start = ind * 3
+                end = start + 3
+                ObjLoader.buffer.extend(colour[start:end])
             elif i % 3 == 2:  # sort the normal vectors
                 start = ind * 3
                 end = start + 3
@@ -59,7 +59,7 @@ class ObjLoader:
             print(buffer[start:end])
 
     @staticmethod
-    def load_model(file, sorted=True):
+    def load_model(file, colour, sorted=True):
         vert_coords = []  # will contain all the vertex coordinates
         tex_coords = []  # will contain all the texture coordinates
         norm_coords = []  # will contain all the vertex normals
@@ -87,7 +87,7 @@ class ObjLoader:
         if sorted:
             # use with glDrawArrays
             ObjLoader.create_sorted_vertex_buffer(
-                all_indices, vert_coords, tex_coords, norm_coords)
+                all_indices, vert_coords, tex_coords, norm_coords, colour)
         else:
             # use with glDrawElements
             ObjLoader.create_unsorted_vertex_buffer(

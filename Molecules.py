@@ -14,20 +14,19 @@ vertex_src = """
 # version 330
 
 layout(location = 0) in vec3 a_position;
-layout(location = 1) in vec2 a_texture;
+layout(location = 1) in vec3 a_texture;
 layout(location = 2) in vec3 a_normal;
 
 uniform mat4 model;
 uniform mat4 projection;
 uniform mat4 view;
 
-//out vec2 v_texture;
 out vec3 v_color;
 
 void main()
 {
     gl_Position = projection * view * model * vec4(a_position, 1.0);
-    v_color = a_normal;
+    v_color = a_texture;
 }
 """
 
@@ -43,8 +42,7 @@ uniform sampler2D s_texture;
 
 void main()
 {
-    //out_color = texture(s_texture, v_texture);
-    out_color = vec4(v_color,1);
+    out_color = vec4(v_color, 1);
 }
 """
 
@@ -108,8 +106,8 @@ lightPos = [25, 25, 25]
 
 cam = [(math.pi/4), (math.pi/4), 20]
 
-sphereI, sphereB = ObjLoader.load_model("sphere.obj")
-floorI, floorB = ObjLoader.load_model("floor.obj")
+wSphereI, wSphereB = ObjLoader.load_model("sphere.obj", [0.9, 0.9, 0.9])
+floorI, floorB = ObjLoader.load_model("floor.obj", [0.1, 0.1, 0.1])
 
 shader = compileProgram(compileShader(
     vertex_src, GL_VERTEX_SHADER), compileShader(fragment_src, GL_FRAGMENT_SHADER))
@@ -124,19 +122,19 @@ for i in range(10):
     glBindVertexArray(VAO[i])
     # Sphere Vertex Buffer Object
     glBindBuffer(GL_ARRAY_BUFFER, VBO[i])
-    glBufferData(GL_ARRAY_BUFFER, sphereB.nbytes,
-                 sphereB, GL_STATIC_DRAW)
+    glBufferData(GL_ARRAY_BUFFER, wSphereB.nbytes,
+                 wSphereB, GL_STATIC_DRAW)
     # Sphere vertices
     glEnableVertexAttribArray(0)
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
-                          sphereB.itemsize * 8, ctypes.c_void_p(0))
+                          wSphereB.itemsize * 8, ctypes.c_void_p(0))
     # Sphere textures
     glEnableVertexAttribArray(1)
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE,
-                          sphereB.itemsize * 8, ctypes.c_void_p(12))
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,
+                          wSphereB.itemsize * 8, ctypes.c_void_p(12))
     # Sphere normals
     glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE,
-                          sphereB.itemsize * 8, ctypes.c_void_p(20))
+                          wSphereB.itemsize * 8, ctypes.c_void_p(20))
     glEnableVertexAttribArray(2)
     VIndex += 1
 
@@ -149,7 +147,7 @@ for i in range(94, 100):
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
                           floorB.itemsize * 8, ctypes.c_void_p(0))
     glEnableVertexAttribArray(1)
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE,
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,
                           floorB.itemsize * 8, ctypes.c_void_p(12))
     # Sphere normals
     glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE,
@@ -266,19 +264,19 @@ while not glfw.window_should_close(window):
             glBindVertexArray(VAO[VIndex])
             # Sphere Vertex Buffer Object
             glBindBuffer(GL_ARRAY_BUFFER, VBO[VIndex])
-            glBufferData(GL_ARRAY_BUFFER, sphereB.nbytes,
-                         sphereB, GL_STATIC_DRAW)
+            glBufferData(GL_ARRAY_BUFFER, wSphereB.nbytes,
+                         wSphereB, GL_STATIC_DRAW)
             # Sphere vertices
             glEnableVertexAttribArray(0)
             glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
-                                  sphereB.itemsize * 8, ctypes.c_void_p(0))
+                                  wSphereB.itemsize * 8, ctypes.c_void_p(0))
             # Sphere textures
             glEnableVertexAttribArray(1)
-            glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE,
-                                  sphereB.itemsize * 8, ctypes.c_void_p(12))
+            glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,
+                                  wSphereB.itemsize * 8, ctypes.c_void_p(12))
             # Sphere normals
             glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE,
-                                  sphereB.itemsize * 8, ctypes.c_void_p(20))
+                                  wSphereB.itemsize * 8, ctypes.c_void_p(20))
             glEnableVertexAttribArray(2)
             VIndex += 1
             sphere_pos.append(pyrr.matrix44.create_from_translation(
@@ -293,7 +291,7 @@ while not glfw.window_should_close(window):
         model = pyrr.matrix44.multiply(sphere_scale[i], sphere_pos[i])
         glBindVertexArray(VAO[i])
         glUniformMatrix4fv(model_loc, 1, GL_FALSE, model)
-        glDrawArrays(GL_TRIANGLES, 0, len(sphereI))
+        glDrawArrays(GL_TRIANGLES, 0, len(wSphereI))
 
     indexNo = 94
     if camPosY < 0:
