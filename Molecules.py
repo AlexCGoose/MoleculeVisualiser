@@ -14,7 +14,7 @@ vertex_src = """
 # version 330
 
 layout(location = 0) in vec3 a_position;
-layout(location = 1) in vec3 a_texture;
+layout(location = 1) in vec3 a_color;
 layout(location = 2) in vec3 a_normal;
 
 uniform mat4 model;
@@ -26,7 +26,7 @@ out vec3 v_color;
 void main()
 {
     gl_Position = projection * view * model * vec4(a_position, 1.0);
-    v_color = a_texture;
+    v_color = a_color;
 }
 """
 
@@ -107,6 +107,15 @@ lightPos = [25, 25, 25]
 cam = [(math.pi/4), (math.pi/4), 20]
 
 wSphereI, wSphereB = ObjLoader.load_model("sphere.obj", [0.9, 0.9, 0.9])
+print(wSphereB[0])
+print(wSphereB[1])
+print(wSphereB[2])
+print(wSphereB[3])
+print(wSphereB[4])
+print(wSphereB[5])
+print(wSphereB[6])
+print(wSphereB[7])
+print(wSphereB[8])
 floorI, floorB = ObjLoader.load_model("floor.obj", [0.1, 0.1, 0.1])
 
 shader = compileProgram(compileShader(
@@ -130,7 +139,7 @@ for i in range(10):
                           wSphereB.itemsize * 8, ctypes.c_void_p(0))
     # Sphere textures
     glEnableVertexAttribArray(1)
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE,
                           wSphereB.itemsize * 8, ctypes.c_void_p(12))
     # Sphere normals
     glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE,
@@ -147,7 +156,7 @@ for i in range(94, 100):
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
                           floorB.itemsize * 8, ctypes.c_void_p(0))
     glEnableVertexAttribArray(1)
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE,
                           floorB.itemsize * 8, ctypes.c_void_p(12))
     # Sphere normals
     glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE,
@@ -272,7 +281,7 @@ while not glfw.window_should_close(window):
                                   wSphereB.itemsize * 8, ctypes.c_void_p(0))
             # Sphere textures
             glEnableVertexAttribArray(1)
-            glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,
+            glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE,
                                   wSphereB.itemsize * 8, ctypes.c_void_p(12))
             # Sphere normals
             glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE,

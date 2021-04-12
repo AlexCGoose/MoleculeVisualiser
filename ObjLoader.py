@@ -22,9 +22,7 @@ class ObjLoader:
                 end = start + 3
                 ObjLoader.buffer.extend(vertices[start:end])
             elif i % 3 == 1:  # sort the texture coordinates
-                start = ind * 3
-                end = start + 3
-                ObjLoader.buffer.extend(colour[start:end])
+                ObjLoader.buffer.extend(colour)
             elif i % 3 == 2:  # sort the normal vectors
                 start = ind * 3
                 end = start + 3
