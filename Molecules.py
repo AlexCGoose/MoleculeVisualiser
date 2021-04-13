@@ -253,22 +253,22 @@ side_scale = pyrr.matrix44.create_from_scale(pyrr.Vector3([0.2, 0.2, 0.2]))
 
 test_pos = []
 test_pos.append(pyrr.matrix44.create_from_translation(
-    pyrr.Vector3([0, 0.25, 0.6])))
+    pyrr.Vector3([0, 0.5, 1.2])))
 test_pos.append(pyrr.matrix44.create_from_translation(
-    pyrr.Vector3([0, 0.25, -0.6])))
+    pyrr.Vector3([0, 0.5, -1.2])))
 test_pos.append(pyrr.matrix44.create_from_translation(
-    pyrr.Vector3([0, -0.25, 0.0])))
+    pyrr.Vector3([0, -0.5, 0.0])))
 test_pos.append(pyrr.matrix44.create_from_translation(
-    pyrr.Vector3([0, 0, 0.25])))
+    pyrr.Vector3([0, 0, 0.6])))
 test_pos.append(pyrr.matrix44.create_from_translation(
-    pyrr.Vector3([0, 0, -0.25])))
+    pyrr.Vector3([0, 0, -0.6])))
 
 test_rotate = []
 test_rotate.append(pyrr.matrix44.create_identity())
 test_rotate.append(pyrr.matrix44.create_identity())
 test_rotate.append(pyrr.matrix44.create_identity())
-test_rotate.append(pyrr.matrix44.create_from_x_rotation(np.pi/4))
 test_rotate.append(pyrr.matrix44.create_from_x_rotation((np.pi/4)*3))
+test_rotate.append(pyrr.matrix44.create_from_x_rotation(np.pi/4))
 
 test_scale = []
 test_scale.append(pyrr.matrix44.create_from_scale(
