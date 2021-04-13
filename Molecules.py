@@ -9,32 +9,32 @@ import math
 from pyrr import matrix44
 from ObjLoader import ObjLoader
 import random
+from TextureLoader import load_texture
 
 vertex_src = """
 # version 330
 
 layout(location = 0) in vec3 a_position;
-layout(location = 1) in vec3 a_color;
+layout(location = 1) in vec2 a_texture;
 layout(location = 2) in vec3 a_normal;
 
 uniform mat4 model;
 uniform mat4 projection;
 uniform mat4 view;
 
-out vec3 v_color;
+out vec2 v_texture;
 
 void main()
 {
     gl_Position = projection * view * model * vec4(a_position, 1.0);
-    v_color = a_color;
+    v_texture = a_texture;
 }
 """
 
 fragment_src = """
 # version 330
 
-//in vec2 v_texture;
-in vec3 v_color;
+in vec2 v_texture;
 
 out vec4 out_color;
 
@@ -42,7 +42,8 @@ uniform sampler2D s_texture;
 
 void main()
 {
-    out_color = vec4(v_color, 1);
+    out_color = texture(s_texture, v_texture);
+    //out_color = vec4(1, 0, 0, 1)
 }
 """
 
@@ -106,7 +107,7 @@ lightPos = [25, 25, 25]
 
 cam = [(math.pi/4), (math.pi/4), 20]
 
-wSphereI, wSphereB = ObjLoader.load_model("sphere.obj", [0.9, 0.9, 0.9])
+wSphereI, wSphereB = ObjLoader.load_model("sphere.obj")
 print(wSphereB[0])
 print(wSphereB[1])
 print(wSphereB[2])
@@ -116,7 +117,7 @@ print(wSphereB[5])
 print(wSphereB[6])
 print(wSphereB[7])
 print(wSphereB[8])
-floorI, floorB = ObjLoader.load_model("floor.obj", [0.1, 0.1, 0.1])
+floorI, floorB = ObjLoader.load_model("floor.obj")
 
 shader = compileProgram(compileShader(
     vertex_src, GL_VERTEX_SHADER), compileShader(fragment_src, GL_FRAGMENT_SHADER))
@@ -162,6 +163,13 @@ for i in range(94, 100):
     glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE,
                           floorB.itemsize * 8, ctypes.c_void_p(20))
     glEnableVertexAttribArray(2)
+
+textures = glGenTextures(5)
+load_texture("Red.jpg", textures[0])
+load_texture("White.jpg", textures[1])
+load_texture("LGrey.jpg", textures[2])
+load_texture("DGrey.jpg", textures[3])
+load_texture("Grid2.png", textures[4])
 
 glUseProgram(shader)
 glClearColor(0.8, 0.8, 0.8, 1)
@@ -299,6 +307,7 @@ while not glfw.window_should_close(window):
     for i in range(len(sphere_pos)):
         model = pyrr.matrix44.multiply(sphere_scale[i], sphere_pos[i])
         glBindVertexArray(VAO[i])
+        glBindTexture(GL_TEXTURE_2D, textures[0])
         glUniformMatrix4fv(model_loc, 1, GL_FALSE, model)
         glDrawArrays(GL_TRIANGLES, 0, len(wSphereI))
 
@@ -309,6 +318,7 @@ while not glfw.window_should_close(window):
     temp = pyrr.matrix44.multiply(side_scale, side_rotate[indexNo-94])
     model = pyrr.matrix44.multiply(temp, side_pos[indexNo-94])
     glBindVertexArray(VAO[indexNo])
+    glBindTexture(GL_TEXTURE_2D, textures[4])
     glUniformMatrix4fv(model_loc, 1, GL_FALSE, model)
     glDrawArrays(GL_TRIANGLES, 0, len(floorI))
 
@@ -319,6 +329,7 @@ while not glfw.window_should_close(window):
     temp = pyrr.matrix44.multiply(side_scale, side_rotate[indexNo-94])
     model = pyrr.matrix44.multiply(temp, side_pos[indexNo-94])
     glBindVertexArray(VAO[indexNo])
+    glBindTexture(GL_TEXTURE_2D, textures[4])
     glUniformMatrix4fv(model_loc, 1, GL_FALSE, model)
     glDrawArrays(GL_TRIANGLES, 0, len(floorI))
 
@@ -329,6 +340,7 @@ while not glfw.window_should_close(window):
     temp = pyrr.matrix44.multiply(side_scale, side_rotate[indexNo-94])
     model = pyrr.matrix44.multiply(temp, side_pos[indexNo-94])
     glBindVertexArray(VAO[indexNo])
+    glBindTexture(GL_TEXTURE_2D, textures[4])
     glUniformMatrix4fv(model_loc, 1, GL_FALSE, model)
     glDrawArrays(GL_TRIANGLES, 0, len(floorI))
 
