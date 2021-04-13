@@ -49,6 +49,8 @@ void main()
 
 
 def processInput(window):
+    global generate_sphere
+    global sphere_to_make
     if(glfw.get_key(window, glfw.KEY_ESCAPE) == glfw.PRESS):
         glfw.set_window_should_close(window, glfw.TRUE)
     if(glfw.get_key(window, glfw.KEY_LEFT) == glfw.PRESS):
@@ -67,9 +69,12 @@ def processInput(window):
     if(glfw.get_key(window, glfw.KEY_S) == glfw.PRESS):
         if (cam[2] <= 40):
             cam[2] = cam[2]+0.01
-    if(glfw.get_key(window, glfw.KEY_ENTER) == glfw.PRESS):
-        global generate_sphere
+    if(glfw.get_key(window, glfw.KEY_H) == glfw.PRESS):
         generate_sphere = 50
+        sphere_to_make = 0
+    if(glfw.get_key(window, glfw.KEY_O) == glfw.PRESS):
+        generate_sphere = 50
+        sphere_to_make = 1
 
 
 def window_resize(window, width, height):
@@ -80,7 +85,7 @@ def window_resize(window, width, height):
 
 
 generate_sphere = 0
-extra_sphere_count = 0
+sphere_to_make = -1
 
 # initializing glfw library
 if not glfw.init():
@@ -107,16 +112,7 @@ lightPos = [25, 25, 25]
 
 cam = [(math.pi/4), (math.pi/4), 20]
 
-wSphereI, wSphereB = ObjLoader.load_model("sphere.obj")
-print(wSphereB[0])
-print(wSphereB[1])
-print(wSphereB[2])
-print(wSphereB[3])
-print(wSphereB[4])
-print(wSphereB[5])
-print(wSphereB[6])
-print(wSphereB[7])
-print(wSphereB[8])
+sphereI, sphereB = ObjLoader.load_model("sphere.obj")
 floorI, floorB = ObjLoader.load_model("floor.obj")
 
 shader = compileProgram(compileShader(
@@ -127,28 +123,7 @@ VAO = glGenVertexArrays(100)
 VBO = glGenBuffers(100)
 VIndex = 0
 
-for i in range(10):
-    # Sphere VAO
-    glBindVertexArray(VAO[i])
-    # Sphere Vertex Buffer Object
-    glBindBuffer(GL_ARRAY_BUFFER, VBO[i])
-    glBufferData(GL_ARRAY_BUFFER, wSphereB.nbytes,
-                 wSphereB, GL_STATIC_DRAW)
-    # Sphere vertices
-    glEnableVertexAttribArray(0)
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
-                          wSphereB.itemsize * 8, ctypes.c_void_p(0))
-    # Sphere textures
-    glEnableVertexAttribArray(1)
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE,
-                          wSphereB.itemsize * 8, ctypes.c_void_p(12))
-    # Sphere normals
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE,
-                          wSphereB.itemsize * 8, ctypes.c_void_p(20))
-    glEnableVertexAttribArray(2)
-    VIndex += 1
-
-for i in range(94, 100):
+for i in range(6):
     glBindVertexArray(VAO[i])
     glBindBuffer(GL_ARRAY_BUFFER, VBO[i])
     glBufferData(GL_ARRAY_BUFFER, floorB.nbytes,
@@ -163,13 +138,36 @@ for i in range(94, 100):
     glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE,
                           floorB.itemsize * 8, ctypes.c_void_p(20))
     glEnableVertexAttribArray(2)
+    VIndex += 1
 
-textures = glGenTextures(5)
-load_texture("Red.jpg", textures[0])
-load_texture("White.jpg", textures[1])
+for i in range(VIndex, VIndex+9):
+    # Sphere VAO
+    glBindVertexArray(VAO[i])
+    # Sphere Vertex Buffer Object
+    glBindBuffer(GL_ARRAY_BUFFER, VBO[i])
+    glBufferData(GL_ARRAY_BUFFER, sphereB.nbytes,
+                 sphereB, GL_STATIC_DRAW)
+    # Sphere vertices
+    glEnableVertexAttribArray(0)
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
+                          sphereB.itemsize * 8, ctypes.c_void_p(0))
+    # Sphere textures
+    glEnableVertexAttribArray(1)
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE,
+                          sphereB.itemsize * 8, ctypes.c_void_p(12))
+    # Sphere normals
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE,
+                          sphereB.itemsize * 8, ctypes.c_void_p(20))
+    glEnableVertexAttribArray(2)
+    VIndex += 1
+
+textures = glGenTextures(6)
+load_texture("White.jpg", textures[0])
+load_texture("Red.jpg", textures[1])
 load_texture("LGrey.jpg", textures[2])
 load_texture("DGrey.jpg", textures[3])
 load_texture("Grid2.png", textures[4])
+load_texture("Black.jpg", textures[5])
 
 glUseProgram(shader)
 glClearColor(0.8, 0.8, 0.8, 1)
@@ -177,39 +175,37 @@ glEnable(GL_DEPTH_TEST)
 glEnable(GL_BLEND)
 glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
-sphere_pos = []
-sphere_pos.append(pyrr.matrix44.create_from_translation(
-    pyrr.Vector3([0, 0, 0])))
-sphere_pos.append(pyrr.matrix44.create_from_translation(
+marker_pos = []
+marker_pos.append(pyrr.matrix44.create_from_translation(
     pyrr.Vector3([-5, -5, -5])))
-sphere_pos.append(pyrr.matrix44.create_from_translation(
+marker_pos.append(pyrr.matrix44.create_from_translation(
     pyrr.Vector3([-5, -5, 5])))
-sphere_pos.append(pyrr.matrix44.create_from_translation(
+marker_pos.append(pyrr.matrix44.create_from_translation(
     pyrr.Vector3([-5, 5, -5])))
-sphere_pos.append(pyrr.matrix44.create_from_translation(
+marker_pos.append(pyrr.matrix44.create_from_translation(
     pyrr.Vector3([-5, 5, 5])))
-sphere_pos.append(pyrr.matrix44.create_from_translation(
+marker_pos.append(pyrr.matrix44.create_from_translation(
     pyrr.Vector3([5, -5, -5])))
-sphere_pos.append(pyrr.matrix44.create_from_translation(
+marker_pos.append(pyrr.matrix44.create_from_translation(
     pyrr.Vector3([5, -5, 5])))
-sphere_pos.append(pyrr.matrix44.create_from_translation(
+marker_pos.append(pyrr.matrix44.create_from_translation(
     pyrr.Vector3([5, 5, -5])))
-sphere_pos.append(pyrr.matrix44.create_from_translation(
+marker_pos.append(pyrr.matrix44.create_from_translation(
     pyrr.Vector3([5, 5, 5])))
-sphere_pos.append(pyrr.matrix44.create_from_translation(
+
+atom_pos = []
+atom_pos.append(pyrr.matrix44.create_from_translation(
     pyrr.Vector3([0, 0, 0])))
 
-sphere_scale = []
-for i in range(9):
-    sphere_scale.append(pyrr.matrix44.create_from_scale(
-        pyrr.Vector3([0.1, 0.1, 0.1])))
-sphere_scale.append(pyrr.matrix44.create_from_scale(
+marker_scale = pyrr.matrix44.create_from_scale(
+    pyrr.Vector3([0.1, 0.1, 0.1]))
+
+atom_scale = []
+atom_scale.append(pyrr.matrix44.create_from_scale(
     pyrr.Vector3([0.2, 0.2, 0.2])))
 
-sphere_trans = []
-for i in range(9):
-    sphere_trans.append(pyrr.matrix44.create_identity)
-sphere_trans.append(pyrr.matrix44.create_from_translation(
+atom_trans = []
+atom_trans.append(pyrr.matrix44.create_from_translation(
     pyrr.Vector3([random.randrange(-20, 20)*0.0001, random.randrange(-20, 20)*0.0001, random.randrange(-20, 20)*0.0001])))
 
 # 7df2ff
@@ -217,6 +213,9 @@ sphere_trans.append(pyrr.matrix44.create_from_translation(
 # ffffff
 # fa87c4
 # 7df2ff
+
+atom_texture = []
+atom_texture.append(0)
 
 side_pos = []
 side_pos.append(pyrr.matrix44.create_from_translation(
@@ -281,79 +280,99 @@ while not glfw.window_should_close(window):
             glBindVertexArray(VAO[VIndex])
             # Sphere Vertex Buffer Object
             glBindBuffer(GL_ARRAY_BUFFER, VBO[VIndex])
-            glBufferData(GL_ARRAY_BUFFER, wSphereB.nbytes,
-                         wSphereB, GL_STATIC_DRAW)
+            glBufferData(GL_ARRAY_BUFFER, sphereB.nbytes,
+                         sphereB, GL_STATIC_DRAW)
             # Sphere vertices
             glEnableVertexAttribArray(0)
             glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
-                                  wSphereB.itemsize * 8, ctypes.c_void_p(0))
+                                  sphereB.itemsize * 8, ctypes.c_void_p(0))
             # Sphere textures
             glEnableVertexAttribArray(1)
             glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE,
-                                  wSphereB.itemsize * 8, ctypes.c_void_p(12))
+                                  sphereB.itemsize * 8, ctypes.c_void_p(12))
             # Sphere normals
             glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE,
-                                  wSphereB.itemsize * 8, ctypes.c_void_p(20))
+                                  sphereB.itemsize * 8, ctypes.c_void_p(20))
             glEnableVertexAttribArray(2)
             VIndex += 1
-            sphere_pos.append(pyrr.matrix44.create_from_translation(
-                pyrr.Vector3([0, 0, 0])))
-            sphere_scale.append(pyrr.matrix44.create_from_scale(
-                pyrr.Vector3([0.2, 0.2, 0.2])))
-            sphere_trans.append(pyrr.matrix44.create_from_translation(
-                pyrr.Vector3([random.randrange(-20, 20)*0.0001, random.randrange(-20, 20)*0.0001, random.randrange(-20, 20)*0.0001])))
+            atom_pos.append(pyrr.matrix44.create_from_translation(
+                pyrr.Vector3([random.randrange(-5, 5), random.randrange(-5, 5), random.randrange(-5, 5)])))
+            if sphere_to_make == 0:
+                atom_scale.append(pyrr.matrix44.create_from_scale(
+                    pyrr.Vector3([0.2, 0.2, 0.2])))
+                atom_trans.append(pyrr.matrix44.create_from_translation(
+                    pyrr.Vector3([random.randrange(-20, 20)*0.0001, random.randrange(-20, 20)*0.0001, random.randrange(-20, 20)*0.0001])))
+                atom_texture.append(0)
+            elif sphere_to_make == 1:
+                atom_scale.append(pyrr.matrix44.create_from_scale(
+                    pyrr.Vector3([0.2, 0.2, 0.2])))
+                atom_trans.append(pyrr.matrix44.create_from_translation(
+                    pyrr.Vector3([random.randrange(-20, 20)*0.0001, random.randrange(-20, 20)*0.0001, random.randrange(-20, 20)*0.0001])))
+                atom_texture.append(1)
             generate_sphere -= 1
 
-    for i in range(len(sphere_pos)):
-        model = pyrr.matrix44.multiply(sphere_scale[i], sphere_pos[i])
-        glBindVertexArray(VAO[i])
-        glBindTexture(GL_TEXTURE_2D, textures[0])
-        glUniformMatrix4fv(model_loc, 1, GL_FALSE, model)
-        glDrawArrays(GL_TRIANGLES, 0, len(wSphereI))
-
-    indexNo = 94
+    indexNo = 0
     if camPosY < 0:
         indexNo += 1
+        print(indexNo)
 
-    temp = pyrr.matrix44.multiply(side_scale, side_rotate[indexNo-94])
-    model = pyrr.matrix44.multiply(temp, side_pos[indexNo-94])
+    temp = pyrr.matrix44.multiply(side_scale, side_rotate[indexNo])
+    model = pyrr.matrix44.multiply(temp, side_pos[indexNo])
     glBindVertexArray(VAO[indexNo])
     glBindTexture(GL_TEXTURE_2D, textures[4])
     glUniformMatrix4fv(model_loc, 1, GL_FALSE, model)
     glDrawArrays(GL_TRIANGLES, 0, len(floorI))
 
-    indexNo = 96
+    indexNo = 2
     if camPosX < 0:
         indexNo += 1
 
-    temp = pyrr.matrix44.multiply(side_scale, side_rotate[indexNo-94])
-    model = pyrr.matrix44.multiply(temp, side_pos[indexNo-94])
+    temp = pyrr.matrix44.multiply(side_scale, side_rotate[indexNo])
+    model = pyrr.matrix44.multiply(temp, side_pos[indexNo])
     glBindVertexArray(VAO[indexNo])
     glBindTexture(GL_TEXTURE_2D, textures[4])
     glUniformMatrix4fv(model_loc, 1, GL_FALSE, model)
     glDrawArrays(GL_TRIANGLES, 0, len(floorI))
 
-    indexNo = 98
+    indexNo = 4
     if camPosZ < 0:
         indexNo += 1
 
-    temp = pyrr.matrix44.multiply(side_scale, side_rotate[indexNo-94])
-    model = pyrr.matrix44.multiply(temp, side_pos[indexNo-94])
+    temp = pyrr.matrix44.multiply(side_scale, side_rotate[indexNo])
+    model = pyrr.matrix44.multiply(temp, side_pos[indexNo])
     glBindVertexArray(VAO[indexNo])
     glBindTexture(GL_TEXTURE_2D, textures[4])
     glUniformMatrix4fv(model_loc, 1, GL_FALSE, model)
     glDrawArrays(GL_TRIANGLES, 0, len(floorI))
 
-    for i in range(9, len(sphere_pos)):
-        sphere_pos[i] = pyrr.matrix44.multiply(sphere_trans[i], sphere_pos[i])
+    indexNo = 6
+
+    for i in range(len(marker_pos)):
+        model = pyrr.matrix44.multiply(marker_scale, marker_pos[i])
+        glBindVertexArray(VAO[indexNo])
+        glBindTexture(GL_TEXTURE_2D, textures[5])
+        glUniformMatrix4fv(model_loc, 1, GL_FALSE, model)
+        glDrawArrays(GL_TRIANGLES, 0, len(sphereI))
+        indexNo += 1
+
+    for i in range(len(atom_pos)):
+        model = pyrr.matrix44.multiply(atom_scale[i], atom_pos[i])
+        glBindVertexArray(VAO[indexNo])
+        glBindTexture(GL_TEXTURE_2D, textures[atom_texture[i]])
+        glUniformMatrix4fv(model_loc, 1, GL_FALSE, model)
+        glDrawArrays(GL_TRIANGLES, 0, len(sphereI))
+        indexNo += 1
+
+    for i in range(len(atom_pos)):
+        atom_pos[i] = pyrr.matrix44.multiply(atom_trans[i], atom_pos[i])
         for j in range(3):
-            if sphere_pos[i][3][j] >= 5:
-                sphere_pos[i][3][j] = 5
-                sphere_trans[i] = pyrr.matrix44.create_from_translation(
+            if atom_pos[i][3][j] >= 5:
+                atom_pos[i][3][j] = 5
+                atom_trans[i] = pyrr.matrix44.create_from_translation(
                     pyrr.Vector3([random.randrange(-20, 20)*0.0001, random.randrange(-20, 20)*0.0001, random.randrange(-20, 20)*0.0001]))
-            if sphere_pos[i][3][j] <= -5:
-                sphere_pos[i][3][j] = -5
-                sphere_trans[i] = pyrr.matrix44.create_from_translation(
+            if atom_pos[i][3][j] <= -5:
+                atom_pos[i][3][j] = -5
+                atom_trans[i] = pyrr.matrix44.create_from_translation(
                     pyrr.Vector3([random.randrange(-20, 20)*0.0001, random.randrange(-20, 20)*0.0001, random.randrange(-20, 20)*0.0001]))
 
     glfw.swap_buffers(window)
