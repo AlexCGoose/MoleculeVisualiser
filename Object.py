@@ -1,5 +1,6 @@
 import pyrr
 import numpy as np
+import random
 
 
 class Object:
@@ -17,3 +18,12 @@ class Object:
         self.move = pyrr.matrix44.create_from_translation(move)
         self.texture = texture
         self.isDrawn = isDrawn
+
+    def updatePos(self):
+        self.position = pyrr.matrix44.multiply(self.move, self.position)
+        self.model = pyrr.matrix44.multiply(
+            self.scale, pyrr.matrix44.multiply(self.rotation, self.position))
+
+    def randomTrans(self):
+        self.move = pyrr.matrix44.create_from_translation([random.randrange(-1000, 1000)*0.001*0.005,
+                                                           random.randrange(-1000, 1000)*0.001*0.005, random.randrange(-1000, 1000)*0.001*0.005])

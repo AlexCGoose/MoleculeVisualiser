@@ -11,6 +11,7 @@ from ObjLoader import ObjLoader
 import random
 from TextureLoader import load_texture
 import Object
+import Atom
 
 vertex_src = """
 # version 330
@@ -83,11 +84,11 @@ def window_resize(window, width, height):
 def key_callback(window, key, scancode, action, mods):
     global atom_to_make, make_a_molecule
     if(glfw.get_key(window, glfw.KEY_H) == glfw.PRESS):
-        atom_to_make = 0
+        atom_to_make = "H"
     if(glfw.get_key(window, glfw.KEY_O) == glfw.PRESS):
-        atom_to_make = 1
+        atom_to_make = "O"
     if(glfw.get_key(window, glfw.KEY_M) == glfw.PRESS):
-        make_a_molecule = 1
+        make_a_molecule = "water"
 
 
 def bindArrays(buffer):
@@ -117,8 +118,34 @@ def drawObject(indexNo, texture, model, faceNo):
     glDrawArrays(GL_TRIANGLES, 0, faceNo)
 
 
+def addAtom(label):
+    global periodic_table, atom_list, sphereB, sphereI, objectList
+    for atom in periodic_table:
+        if atom.label == label:
+            objectCount = len(objectList)
+            atom_list.append(atom)
+            position = [
+                random.randrange(-5000, 5000)*0.001, random.randrange(-5000, 5000)*0.001, random.randrange(-5000, 5000)*0.001]
+            move = [random.randrange(-1000, 1000)*0.001*0.005,
+                    random.randrange(-1000, 1000)*0.001*0.005, random.randrange(-1000, 1000)*0.001*0.005]
+            objectList.append(Object.Object(bindArrays(sphereB), len(sphereI), "Atom", len(atom_list)-1,
+                                            position, [0, 0, 0], [atom.size, atom.size, atom.size], move, atom.texture, True))
+            atom_list[len(atom_list)-1].setObjectNo(objectCount)
+
+
+periodic_table = []
+periodic_table.append(Atom.Atom("H", "Hydrogen", 0.2, 0, None))
+periodic_table.append(Atom.Atom("He", "Helium", 0.2, 4, None))
+periodic_table.append(Atom.Atom("Li", "Lithium", 0.2, 4, None))
+periodic_table.append(Atom.Atom("Be", "Beryllium", 0.2, 4, None))
+periodic_table.append(Atom.Atom("B", "Boron", 0.2, 4, None))
+periodic_table.append(Atom.Atom("C", "Carbon", 0.2, 5, None))
+periodic_table.append(Atom.Atom("N", "Nitrogen", 0.2, 5, None))
+periodic_table.append(Atom.Atom("O", "Oxygen", 0.25, 1, None))
+atom_list = []
+
 generate_sphere = 0
-atom_to_make = -1
+atom_to_make = None
 make_a_molecule = 0
 
 # initializing glfw library
@@ -214,14 +241,6 @@ for i in range(8):
     objectList.append(Object.Object(bindArrays(sphereB), len(sphereI), "Marker", i,
                                     marker_pos[i], [0, 0, 0], marker_scale, [0, 0, 0], 4, True))
 
-periodic_table = []
-hydrogen = ["H", "Hydrogen", pyrr.matrix44.create_from_scale(
-    pyrr.Vector3([0.2, 0.2, 0.2])), 0]
-oxygen = ["O", "Oxygen", pyrr.matrix44.create_from_scale(
-    pyrr.Vector3([0.25, 0.25, 0.25])), 1]
-periodic_table.append(hydrogen)
-periodic_table.append(oxygen)
-
 projection = pyrr.matrix44.create_perspective_projection_matrix(
     45, 1920/1080, 0.1, 100)
 view = pyrr.matrix44.create_look_at(pyrr.Vector3(
@@ -269,135 +288,44 @@ while not glfw.window_should_close(window):
 
     glUniformMatrix4fv(view_loc, 1, GL_FALSE, view)
 
+    if camPosY < 0:
+        objectList[0].isDrawn = False
+        objectList[1].isDrawn = True
+    elif camPosY >= 0:
+        objectList[0].isDrawn = True
+        objectList[1].isDrawn = False
+
+    if camPosX < 0:
+        objectList[2].isDrawn = False
+        objectList[3].isDrawn = True
+    elif camPosX >= 0:
+        objectList[2].isDrawn = True
+        objectList[3].isDrawn = False
+
+    if camPosZ < 0:
+        objectList[4].isDrawn = False
+        objectList[5].isDrawn = True
+    elif camPosZ >= 0:
+        objectList[4].isDrawn = True
+        objectList[5].isDrawn = False
+
+    if atom_to_make != None:
+        addAtom(atom_to_make)
+        atom_to_make = None
+
     for object in objectList:
-        drawObject(
-            object.index, textures[object.texture], object.model, object.faceNo)
-
-    # indexNo = 0
-    # if camPosY < 0:
-    #    indexNo += 1
-
-    # temp = pyrr.matrix44.multiply(side_scale, side_rotate[indexNo])
-    # model = pyrr.matrix44.multiply(temp, side_pos[indexNo])
-    # drawObject(indexNo, textures[4], model, len(floorI))
-
-    # indexNo = 2
-    # if camPosX < 0:
-    #    indexNo += 1
-
-    # temp = pyrr.matrix44.multiply(side_scale, side_rotate[indexNo])
-    # model = pyrr.matrix44.multiply(temp, side_pos[indexNo])
-    # drawObject(indexNo, textures[4], model, len(floorI))
-
-    # indexNo = 4
-    # if camPosZ < 0:
-    #    indexNo += 1
-
-    # temp = pyrr.matrix44.multiply(side_scale, side_rotate[indexNo])
-    # model = pyrr.matrix44.multiply(temp, side_pos[indexNo])
-    # drawObject(indexNo, textures[4], model, len(floorI))
-
-    # indexNo = 6
-
-    # for i in range(len(test_pos)):
-    #    temp = pyrr.matrix44.multiply(test_scale[i], test_rotate[i])
-    #    model = pyrr.matrix44.multiply(temp, test_pos[i])
-    #    if i <= 3:
-    #        drawObject(indexNo, textures[test_tex[i]], model, len(sphereI))
-    #    elif i >= 4:
-    #        drawObject(indexNo, textures[test_tex[i]], model, len(barI))
-    #    indexNo += 1
-
-    # for i in range(len(marker_pos)):
-    #    model = pyrr.matrix44.multiply(marker_scale, marker_pos[i])
-    #    drawObject(indexNo, textures[5], model, len(sphereI))
-    #    indexNo += 1
-
-    # for i in range(len(atom_list)):
-    #    model = pyrr.matrix44.multiply(atom_scale[i], atom_pos[i])
-    #    drawObject(
-    #        indexNo, textures[periodic_table[atom_list[i]][2]], model, len(sphereI))
-    #    indexNo += 1
-
-    # if molecule1 == False:
-    #    for i in range(len(atom_list)):
-    #        if atom_list[i] == 0:
-    #            if h1 == -1:
-    #                h1 = i
-    #            elif h2 == -1:
-    #                if h1 != i:
-    #                    h2 = i
-    #        elif atom_list[i] == 1:
-    #            o1 = i
-    #    if h1 != -1 & h2 != -1 & o1 != -1:
-    #        molecule1 = True
-    #        molecule2 = True
-    #        molecule3 = True
-
-    # if molecule2 == True:
-    #    print(atom_pos[h1])
-    #    average = [(atom_pos[h1][3][0]+atom_pos[h2][3][0]+atom_pos[o1][3][0])/3, (
-    #        atom_pos[h1][3][1]+atom_pos[h2][3][1]+atom_pos[o1][3][1])/3, (atom_pos[h1][3][2]+atom_pos[h2][3][2]+atom_pos[o1][3][2])/3]
-    #    atom_trans[h1] = pyrr.matrix44.create_from_translation(
-    #        pyrr.Vector3([(0-atom_pos[h1][3][0])*-0.002, (0.5-atom_pos[h1][3][1])*-0.002, (1.2-atom_pos[h1][3][2])*-0.002]))
-    #    atom_trans[h2] = pyrr.matrix44.create_from_translation(
-    #        pyrr.Vector3([(0-atom_pos[h2][3][0])*-0.002, (0.5-atom_pos[h2][3][1])*-0.002, (-1.2-atom_pos[h2][3][2])*-0.002]))
-    #    atom_trans[o1] = pyrr.matrix44.create_from_translation(
-    #        pyrr.Vector3([(0-atom_pos[o1][3][0])*-0.002, (-0.5-atom_pos[o1][3][1])*-0.002, (0-atom_pos[o1][3][2])*-0.002]))
-    #    molecule2 = False
-
-    # if molecule3 == True:
-    #    if pyrr.Matrix44(atom_pos[h1]) == pyrr.matrix44.create_from_translation(pyrr.Vector3([0, 0.5, 1.2])):
-    #        print("AWOOGA")
-
-    #    print("AWOooOGA")
-    #    print(pyrr.Matrix44(atom_pos[h1]))
-    #    print(pyrr.matrix44.create_from_translation(
-    #        pyrr.Vector3([0, 0.5, 1.2])))
-
-    #    if atom_pos[h1][3][0] == 0:
-    #        atom_trans[h1][0] = 0
-    #    if atom_pos[h1][3][1] == 0.5:
-    #        atom_trans[h1][1] = 0
-    #    if atom_pos[h1][3][2] == 1.2:
-    #        atom_trans[h1][0] = 0
-    #    if atom_pos[h2][3][0] == 0:
-    #        atom_trans[h2][0] = 0
-    #    if atom_pos[h2][3][1] == 0.5:
-    #        atom_trans[h2][1] = 0
-    #    if atom_pos[h2][3][2] == -1.2:
-    #        atom_trans[h2][0] = 0
-    #    if atom_pos[o1][3][0] == 0:
-    #        atom_trans[o1][0] = 0
-    #    if atom_pos[o1][3][1] == -0.5:
-    #        atom_trans[o1][1] = 0
-    #    if atom_pos[o1][3][2] == 0:
-    #        atom_trans[o1][0] = 0
-
-    # for i in range(len(test_pos)):
-    #    test_pos[i] = pyrr.matrix44.multiply(test_trans, test_pos[i])
-    #    for j in range(3):
-    #        if test_pos[i][3][j] >= 5:
-    #            test_pos[i][3][j] = 5
-    #            test_trans = pyrr.matrix44.create_from_translation(
-    #                pyrr.Vector3([random.randrange(-20, 20)*0.00005, random.randrange(-20, 20)*0.00005, random.randrange(-20, 20)*0.00005]))
-    #        if test_pos[i][3][j] <= -5:
-    #            test_pos[i][3][j] = -5
-    #            test_trans = pyrr.matrix44.create_from_translation(
-    #                pyrr.Vector3([random.randrange(-20, 20)*0.00005, random.randrange(-20, 20)*0.00005, random.randrange(-20, 20)*0.00005]))
-
-    # for i in range(len(atom_pos)):
-    #    atom_pos[i] = pyrr.matrix44.multiply(atom_trans[i], atom_pos[i])
-    #    for j in range(3):
-    #        if atom_pos[i][3][j] >= 5:
-    #            atom_pos[i][3][j] = 5
-    #            atom_trans[i] = pyrr.matrix44.create_from_translation(
-    #                pyrr.Vector3([random.randrange(-20, 20)*0.0001, random.randrange(-20, 20)*0.0001, random.randrange(-20, 20)*0.0001]))
-    #        if atom_pos[i][3][j] <= -5:
-    #            atom_pos[i][3][j] = -5
-    #            atom_trans[i] = pyrr.matrix44.create_from_translation(
-    #                pyrr.Vector3([random.randrange(-20, 20)*0.0001, random.randrange(-20, 20)*0.0001, random.randrange(-20, 20)*0.0001]))
-
+        if object.type == "Atom":
+            for i in range(3):
+                if object.position[3][i] >= 5:
+                    object.position[3][i] = 5
+                    object.randomTrans()
+                if object.position[3][i] <= -5:
+                    object.position[3][i] = -5
+                    object.randomTrans()
+        object.updatePos()
+        if object.isDrawn == True:
+            drawObject(
+                object.index, textures[object.texture], object.model, object.faceNo)
     glfw.swap_buffers(window)
 
 # terminate glfw, free up allocated resources
