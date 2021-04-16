@@ -12,6 +12,7 @@ import random
 from TextureLoader import load_texture
 import Object
 import Atom
+import Molecule
 
 vertex_src = """
 # version 330
@@ -66,45 +67,51 @@ def processInput(window):
     if(glfw.get_key(window, glfw.KEY_DOWN) == glfw.PRESS):
         if (cam[1] >= -(math.pi/3)):
             cam[1] = cam[1]-(math.pi/1500)
-    if(glfw.get_key(window, glfw.KEY_W) == glfw.PRESS):
+    if(glfw.get_key(window, glfw.KEY_PAGE_UP) == glfw.PRESS):
         if (cam[2] >= 5):
             cam[2] = cam[2]-0.01
-    if(glfw.get_key(window, glfw.KEY_S) == glfw.PRESS):
+    if(glfw.get_key(window, glfw.KEY_PAGE_DOWN) == glfw.PRESS):
         if (cam[2] <= 40):
             cam[2] = cam[2]+0.01
 
 
-def window_resize(window, width, height):
-    glViewport(0, 0, width, height)
-    projection = pyrr.matrix44.create_perspective_projection_matrix(
-        45, width / height, 0.1, 100)
-    glUniformMatrix4fv(proj_loc, 1, GL_FALSE, projection)
+# def window_resize(window, width, height):
+#    glViewport(0, 0, width, height)
+#    projection = pyrr.matrix44.create_perspective_projection_matrix(
+#        45, width / height, 0.1, 100)
+#    glUniformMatrix4fv(proj_loc, 1, GL_FALSE, projection)
 
 
 def key_callback(window, key, scancode, action, mods):
-    global atom_to_make, make_a_molecule
-    if(glfw.get_key(window, glfw.KEY_H) == glfw.PRESS):
-        atom_to_make = "H"
-    if(glfw.get_key(window, glfw.KEY_HOME) == glfw.PRESS):
-        atom_to_make = "He"
-    if(glfw.get_key(window, glfw.KEY_L) == glfw.PRESS):
-        atom_to_make = "Li"
-    if(glfw.get_key(window, glfw.KEY_RIGHT_BRACKET) == glfw.PRESS):
-        atom_to_make = "Be"
-    if(glfw.get_key(window, glfw.KEY_B) == glfw.PRESS):
-        atom_to_make = "B"
-    if(glfw.get_key(window, glfw.KEY_C) == glfw.PRESS):
-        atom_to_make = "C"
-    if(glfw.get_key(window, glfw.KEY_N) == glfw.PRESS):
-        atom_to_make = "N"
-    if(glfw.get_key(window, glfw.KEY_O) == glfw.PRESS):
-        atom_to_make = "O"
+    global atom_to_make, make_a_molecule, periodic_table, molecule_set
+    if(glfw.get_key(window, glfw.KEY_Q) == glfw.PRESS):
+        addRandAtom("H")
+    if(glfw.get_key(window, glfw.KEY_W) == glfw.PRESS):
+        addRandAtom("He")
+    if(glfw.get_key(window, glfw.KEY_E) == glfw.PRESS):
+        addRandAtom("Li")
+    if(glfw.get_key(window, glfw.KEY_R) == glfw.PRESS):
+        addRandAtom("Be")
+    if(glfw.get_key(window, glfw.KEY_T) == glfw.PRESS):
+        addRandAtom("B")
+    if(glfw.get_key(window, glfw.KEY_Y) == glfw.PRESS):
+        addRandAtom("C")
+    if(glfw.get_key(window, glfw.KEY_U) == glfw.PRESS):
+        addRandAtom("N")
+    if(glfw.get_key(window, glfw.KEY_I) == glfw.PRESS):
+        addRandAtom("O")
     if(glfw.get_key(window, glfw.KEY_1) == glfw.PRESS):
-        make_a_molecule = "O2"
+        addMoleculeToBuffer(molecule_set[0])
+        drawMolecule(molecule_set[0].name)
     if(glfw.get_key(window, glfw.KEY_2) == glfw.PRESS):
-        make_a_molecule = "H2O"
+        addMoleculeToBuffer(molecule_set[1])
+        drawMolecule(molecule_set[1].name)
     if(glfw.get_key(window, glfw.KEY_3) == glfw.PRESS):
-        make_a_molecule = "C2H6"
+        addMoleculeToBuffer(molecule_set[2])
+        drawMolecule(molecule_set[2].name)
+    if(glfw.get_key(window, glfw.KEY_4) == glfw.PRESS):
+        addMoleculeToBuffer(molecule_set[3])
+        drawMolecule(molecule_set[3].name)
 
 
 def bindArrays(buffer):
@@ -134,13 +141,13 @@ def drawObject(indexNo, texture, model, faceNo):
     glDrawArrays(GL_TRIANGLES, 0, faceNo)
 
 
-def addAtom(atom, position, move):
+def addAtom(atom, position, move, draw):
     global periodic_table, atom_list, sphereB, sphereI, objectList
     objectCount = len(objectList)
     atom_list.append(atom)
     objectList.append(Object.Object(bindArrays(sphereB), len(sphereI), "Atom", len(atom_list)-1,
-                                    position, [0, 0, 0], [atom.size, atom.size, atom.size], move, atom.texture, True))
-    atom_list[len(atom_list)-1].setObjectNo(objectCount)
+                                    position, [0, 0, 0], [atom.size, atom.size, atom.size], move, atom.texture, draw))
+    atom_list[-1].setObjectNo(objectCount)
 
 
 def addRandAtom(label):
@@ -151,11 +158,11 @@ def addRandAtom(label):
                 random.randrange(-5000, 5000)*0.001, random.randrange(-5000, 5000)*0.001, random.randrange(-5000, 5000)*0.001]
             move = [random.randrange(-1000, 1000)*0.001*0.005,
                     random.randrange(-1000, 1000)*0.001*0.005, random.randrange(-1000, 1000)*0.001*0.005]
-            addAtom(atom, position, move)
+            addAtom(atom, position, move, True)
 
 
-def addBar(start, end):
-    global barB, barI
+def addBar(start, end, draw):
+    global barB, barI, bar_list
     centre = (pyrr.Vector3(start) + pyrr.Vector3(end))/pyrr.Vector3([2, 2, 2])
     centre = centre + pyrr.Vector3([0, 0.1, 0])
     vector = pyrr.Vector3(end) - pyrr.Vector3(start)
@@ -178,50 +185,69 @@ def addBar(start, end):
     rotate = [-angleX, 0, angleZ]
     scale = [0.15, 0.75, 0.15]
     objectList.append(Object.Object(bindArrays(barB), len(barI), "Bar", len(bar_list),
-                                    centre, rotate, scale, [0, 0, 0], 13, True))
+                                    centre, rotate, scale, [0, 0, 0], 13, draw))
 
 
-def addMolecule(moleculeName):
-    gap = 0.75
-    if moleculeName == "O2":
-        addAtom(periodic_table[7], [0, 0, -gap], [0, 0, 0])
-        addAtom(periodic_table[7], [0, 0, gap], [0, 0, 0])
-        addBar([0, 0, -gap], [0, 0, gap])
-    if moleculeName == "H2O":
-        addAtom(periodic_table[0], [0, np.sqrt(3)-1, 1], [0, 0, 0])
-        addAtom(periodic_table[7], [0, 1-np.sqrt(3), 0], [0, 0, 0])
-        addBar([0, np.sqrt(3)-1, 1], [0, 1-np.sqrt(3), 0])
-        addAtom(periodic_table[0], [0, np.sqrt(3)-1, -1], [0, 0, 0])
-        addBar([0, np.sqrt(3)-1, -1], [0, 1-np.sqrt(3), 0])
-    if moleculeName == "C2H6":
-        addAtom(periodic_table[5], [0, 0, -gap], [0, 0, 0])
-        addAtom(periodic_table[5], [0, 0, gap], [0, 0, 0])
-        addBar([0, 0, -gap], [0, 0, gap])
-        addAtom(periodic_table[0], [0, gap*np.sqrt(4.5), gap*2.5], [0, 0, 0])
-        addBar([0, 0, gap], [0, gap*np.sqrt(4.5), gap*2.5])
-        addAtom(periodic_table[0], [gap*1.5, -gap*1.5, gap*2.5], [0, 0, 0])
-        addBar([0, 0, gap], [gap*1.5, -gap*1.5, gap*2.5])
-        addAtom(periodic_table[0], [-gap*1.5, -gap*1.5, gap*2.5], [0, 0, 0])
-        addBar([0, 0, gap], [-gap*1.5, -gap*1.5, gap*2.5])
+def addMoleculeToBuffer(molecule):
+    global molecule_set, objectList, molecule_list
+    if molecule not in molecule_list:
+        molecule_list.append(molecule)
+        i = 0
+        for atom in molecule.atomList:
+            addAtom(atom, molecule.atomPos[i], [0, 0, 0], False)
+            if i == 0:
+                molecule_list[-1].startObject = len(objectList)-1
+                molecule_list[-1].endObject = molecule_list[-1].startObject + \
+                    len(molecule_list[-1].atomList) + \
+                    len(molecule_list[-1].barList)
+            i += 1
+        for bar in molecule.barList:
+            addBar(molecule.atomPos[bar[0]], molecule.atomPos[bar[1]], False)
 
-        addAtom(periodic_table[0], [0, gap*np.sqrt(4.5), -gap*2.5], [0, 0, 0])
-        addBar([0, 0, -gap], [0, gap*np.sqrt(4.5), -gap*2.5])
-        addAtom(periodic_table[0], [gap*1.5, -gap*1.5, -gap*2.5], [0, 0, 0])
-        addBar([0, 0, -gap], [gap*1.5, -gap*1.5, -gap*2.5])
-        addAtom(periodic_table[0], [-gap*1.5, -gap*1.5, -gap*2.5], [0, 0, 0])
-        addBar([0, 0, -gap], [-gap*1.5, -gap*1.5, -gap*2.5])
+
+def drawMolecule(moleculeName):
+    global molecule_list, objectList
+    for molecule in molecule_list:
+        if molecule.name == moleculeName:
+            for object in objectList[molecule.startObject:molecule.startObject+len(molecule.atomList)+len(molecule.barList)]:
+                object.updateDraw(True)
+        else:
+            for object in objectList[molecule.startObject:molecule.startObject+len(molecule.atomList)+len(molecule.barList)]:
+                object.updateDraw(False)
 
 
 periodic_table = []
-periodic_table.append(Atom.Atom("H", "Hydrogen", 0.15, 0, None))
-periodic_table.append(Atom.Atom("He", "Helium", 0.15, 7, None))
+periodic_table.append(Atom.Atom("H", "Hydrogen", 0.175, 0, None))
+periodic_table.append(Atom.Atom("He", "Helium", 0.175, 7, None))
 periodic_table.append(Atom.Atom("Li", "Lithium", 0.2, 11, None))
 periodic_table.append(Atom.Atom("Be", "Beryllium", 0.2, 12, None))
 periodic_table.append(Atom.Atom("B", "Boron", 0.2, 10, None))
-periodic_table.append(Atom.Atom("C", "Carbon", 0.25, 1, None))
-periodic_table.append(Atom.Atom("N", "Nitrogen", 0.25, 2, None))
-periodic_table.append(Atom.Atom("O", "Oxygen", 0.25, 3, None))
+periodic_table.append(Atom.Atom("C", "Carbon", 0.225, 1, None))
+periodic_table.append(Atom.Atom("N", "Nitrogen", 0.225, 2, None))
+periodic_table.append(Atom.Atom("O", "Oxygen", 0.225, 3, None))
 atom_list = []
+molecule_set = []
+molecule_set.append(Molecule.Molecule("O2", None, None, [periodic_table[7], periodic_table[7]], [
+    [0, 0, -0.75], [0, 0, 0.75]], [(0, 1)]))
+molecule_set.append(Molecule.Molecule("H2O", None, None, [periodic_table[0], periodic_table[0], periodic_table[7]], [
+    [0, np.sqrt(3)-1, -1], [0, np.sqrt(3)-1, 1], [0, 1-np.sqrt(3), 0]], [(0, 2), (1, 2)]))
+molecule_set.append(Molecule.Molecule("C2H4", None, None,
+                                      [periodic_table[5], periodic_table[5], periodic_table[0],
+                                       periodic_table[0], periodic_table[0], periodic_table[0]],
+                                      [[0, 0, -0.75], [0, 0, 0.75], [0, 0.75*np.sqrt(4.5), -1.875], [0, -0.75 * np.sqrt(
+                                          4.5), -1.875], [0, 0.75*np.sqrt(4.5), 1.875], [0, -0.75 * np.sqrt(4.5), 1.875]],
+                                      [(0, 1), (0, 2), (0, 3), (1, 4), (1, 5)]))
+molecule_set.append(Molecule.Molecule("C2H6", None, None,
+                                      [periodic_table[5], periodic_table[5], periodic_table[0],
+                                       periodic_table[0], periodic_table[0], periodic_table[0],
+                                       periodic_table[0], periodic_table[0]],
+                                      [[0, 0, -0.75], [0, 0, 0.75], [0, 0.75 *
+                                                                     np.sqrt(4.5), -1.875], [1.125, -1.125, -1.875],
+                                       [-1.125, -1.125, -1.875], [0, 0.75 *
+                                                                  np.sqrt(4.5), 1.875], [1.125, -1.125, 1.875],
+                                       [-1.125, -1.125, 1.875]],
+                                      [(0, 1), (0, 2), (0, 3), (0, 4), (1, 5), (1, 6), (1, 7)]))
+molecule_list = []
 bar_list = []
 
 atom_to_make = None
@@ -232,7 +258,8 @@ if not glfw.init():
     raise Exception("glfw can not be initialized!")
 
 # creating the window
-window = glfw.create_window(1920, 1080, "Molecule Visualiser", None, None)
+window = glfw.create_window(
+    1920, 1080, "Molecule Visualiser", glfw.get_primary_monitor(), None)
 
 # check if window was created
 if not window:
@@ -243,14 +270,14 @@ if not window:
 glfw.set_window_pos(window, 0, 0)
 
 # set the callback function for window resize
-glfw.set_window_size_callback(window, window_resize)
+#glfw.set_window_size_callback(window, window_resize)
 
 # make the context current
 glfw.make_context_current(window)
 
 glfw.set_key_callback(window, key_callback)
 
-textures = glGenTextures(17)
+textures = glGenTextures(18)
 load_texture("textures/White.jpg", textures[0])
 load_texture("textures/Black.jpg", textures[1])
 load_texture("textures/Blue.jpg", textures[2])
@@ -267,7 +294,8 @@ load_texture("textures/DGreen.jpg", textures[12])
 load_texture("textures/LGrey.jpg", textures[13])
 load_texture("textures/DOrange.jpg", textures[14])
 load_texture("textures/Pink.jpg", textures[15])
-load_texture("textures/Grid.png", textures[16])
+load_texture("textures/GridLighter.png", textures[16])
+load_texture("textures/GridColour.jpg", textures[17])
 
 sphereI, sphereB = ObjLoader.load_model("models/sphere.obj")
 floorI, floorB = ObjLoader.load_model("models/floor.obj")
@@ -329,7 +357,7 @@ marker_scale = [0.1, 0.1, 0.1]
 
 for i in range(8):
     objectList.append(Object.Object(bindArrays(sphereB), len(sphereI), "Marker", i,
-                                    marker_pos[i], [0, 0, 0], marker_scale, [0, 0, 0], 1, True))
+                                    marker_pos[i], [0, 0, 0], marker_scale, [0, 0, 0], 17, True))
 
 projection = pyrr.matrix44.create_perspective_projection_matrix(
     45, 1920/1080, 0.1, 100)
@@ -391,10 +419,6 @@ while not glfw.window_should_close(window):
     elif camPosZ >= 0:
         objectList[4].isDrawn = True
         objectList[5].isDrawn = False
-
-    if make_a_molecule != None:
-        addMolecule(make_a_molecule)
-        make_a_molecule = None
 
     if atom_to_make != None:
         addRandAtom(atom_to_make)

@@ -27,3 +27,6 @@ class Object:
     def randomTrans(self):
         self.move = pyrr.matrix44.create_from_translation([random.randrange(-1000, 1000)*0.001*0.005,
                                                            random.randrange(-1000, 1000)*0.001*0.005, random.randrange(-1000, 1000)*0.001*0.005])
+
+    def updateDraw(self, isDrawn):
+        self.isDrawn = isDrawn
