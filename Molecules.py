@@ -163,10 +163,10 @@ def drawObject(indexNo, texture, model, faceNo):
 
 
 def addAtom(atom, position, move, draw):
-    global periodic_table, atom_list, sphereB, sphereI, objectList
+    global periodic_table, atom_list, sphereB, sphereI, objectList, sphereIndex
     objectCount = len(objectList)
     atom_list.append(atom)
-    objectList.append(Object.Object(bindArrays(sphereB), len(sphereI), "Atom", len(atom_list)-1,
+    objectList.append(Object.Object(sphereIndex, len(sphereI), "Atom", len(atom_list)-1,
                                     position, [0, 0, 0], [atom.size, atom.size, atom.size], move, atom.texture, draw))
     atom_list[-1].setObjectNo(objectCount)
 
@@ -181,7 +181,7 @@ def addRandAtom(index):
 
 
 def addBar(start, end, scale, pos, draw):
-    global barB, barI, bar_list
+    global barB, barI, bar_list, barIndex
     centre = (pyrr.Vector3(start) + pyrr.Vector3(end))/pyrr.Vector3([2, 2, 2])
     centre = centre + pyrr.Vector3([0, 0.1+pos, 0])
     vector = pyrr.Vector3(end) - pyrr.Vector3(start)
@@ -202,7 +202,7 @@ def addBar(start, end, scale, pos, draw):
 
     rotate = [-angleX, 0, angleZ]
     scale = [0.15*scale, 0.75, 0.15*scale]
-    objectList.append(Object.Object(bindArrays(barB), len(barI), "Bar", len(bar_list),
+    objectList.append(Object.Object(barIndex, len(barI), "Bar", len(bar_list),
                                     centre, rotate, scale, [0, 0, 0], 16, draw))
 
 
@@ -240,52 +240,6 @@ def drawMolecule(moleculeName):
             for object in objectList[molecule.startObject:molecule.startObject+len(molecule.atomList)+molecule.barCount]:
                 object.updateDraw(False)
 
-
-periodic_table = []
-periodic_table.append(Atom.Atom("H", "Hydrogen", 0.175, 0, None))
-periodic_table.append(Atom.Atom("He", "Helium", 0.175, 11, None))
-periodic_table.append(Atom.Atom("Li", "Lithium", 0.2, 1, None))
-periodic_table.append(Atom.Atom("Be", "Beryllium", 0.2, 2, None))
-periodic_table.append(Atom.Atom("B", "Boron", 0.2, 3, None))
-periodic_table.append(Atom.Atom("C", "Carbon", 0.2, 4, None))
-periodic_table.append(Atom.Atom("N", "Nitrogen", 0.2, 5, None))
-periodic_table.append(Atom.Atom("O", "Oxygen", 0.225, 6, None))
-periodic_table.append(Atom.Atom("F", "Flourine", 0.225, 7, None))
-periodic_table.append(Atom.Atom("Ne", "Neon", 0.225, 11, None))
-periodic_table.append(Atom.Atom("Na", "Sodium", 0.25, 1, None))
-periodic_table.append(Atom.Atom("Mg", "Magnesium", 0.25, 2, None))
-periodic_table.append(Atom.Atom("Al", "Aluminium", 0.25, 3, None))
-periodic_table.append(Atom.Atom("Si", "Silicon", 0.275, 3, None))
-periodic_table.append(Atom.Atom("P", "Phosphorus", 0.275, 12, None))
-periodic_table.append(Atom.Atom("S", "Sulfur", 0.275, 13, None))
-periodic_table.append(Atom.Atom("Cl", "Chlorine", 0.275, 3, None))
-periodic_table.append(Atom.Atom("Ar", "Argon", 0.3, 11, None))
-periodic_table.append(Atom.Atom("K", "Potassium", 0.3, 1, None))
-periodic_table.append(Atom.Atom("Ca", "Calcium", 0.3, 2, None))
-atom_list = []
-molecule_set = []
-molecule_set.append(Molecule.Molecule("O2", None, None, [periodic_table[7], periodic_table[7]], [
-    [0, 0, -0.75], [0, 0, 0.75]], [(0, 1, 1)], 1))
-molecule_set.append(Molecule.Molecule("H2O", None, None, [periodic_table[0], periodic_table[0], periodic_table[7]], [
-    [0, np.sqrt(3)-1, -1], [0, np.sqrt(3)-1, 1], [0, 1-np.sqrt(3), 0]], [(0, 2, 1), (1, 2, 1)], 2))
-molecule_set.append(Molecule.Molecule("C2H4", None, None,
-                                      [periodic_table[5], periodic_table[5], periodic_table[0],
-                                       periodic_table[0], periodic_table[0], periodic_table[0]],
-                                      [[0, 0, -0.75], [0, 0, 0.75], [0, 0.75*np.sqrt(4.5), -1.875], [0, -0.75 * np.sqrt(
-                                          4.5), -1.875], [0, 0.75*np.sqrt(4.5), 1.875], [0, -0.75 * np.sqrt(4.5), 1.875]],
-                                      [(0, 1, 2), (0, 2, 1), (0, 3, 1), (1, 4, 1), (1, 5, 1)], 6))
-molecule_set.append(Molecule.Molecule("C2H6", None, None,
-                                      [periodic_table[5], periodic_table[5], periodic_table[0],
-                                       periodic_table[0], periodic_table[0], periodic_table[0],
-                                       periodic_table[0], periodic_table[0]],
-                                      [[0, 0, -0.75], [0, 0, 0.75], [0, 0.75 *
-                                                                     np.sqrt(4.5), -1.875], [1.125, -1.125, -1.875],
-                                       [-1.125, -1.125, -1.875], [0, 0.75 *
-                                                                  np.sqrt(4.5), 1.875], [1.125, -1.125, 1.875],
-                                       [-1.125, -1.125, 1.875]],
-                                      [(0, 1, 1), (0, 2, 1), (0, 3, 1), (0, 4, 1), (1, 5, 1), (1, 6, 1), (1, 7, 1)], 7))
-molecule_list = []
-bar_list = []
 
 # initializing glfw library
 if not glfw.init():
@@ -333,6 +287,53 @@ load_texture("textures/DGrey.jpg", textures[17])
 load_texture("textures/GridColour.jpg", textures[18])
 load_texture("textures/GridLighter.png", textures[19])
 
+periodic_table = []
+periodic_table.append(Atom.Atom("H", "Hydrogen", 0.175, 0, None))
+periodic_table.append(Atom.Atom("He", "Helium", 0.175, 11, None))
+periodic_table.append(Atom.Atom("Li", "Lithium", 0.2, 1, None))
+periodic_table.append(Atom.Atom("Be", "Beryllium", 0.2, 2, None))
+periodic_table.append(Atom.Atom("B", "Boron", 0.2, 3, None))
+periodic_table.append(Atom.Atom("C", "Carbon", 0.2, 4, None))
+periodic_table.append(Atom.Atom("N", "Nitrogen", 0.2, 5, None))
+periodic_table.append(Atom.Atom("O", "Oxygen", 0.225, 6, None))
+periodic_table.append(Atom.Atom("F", "Flourine", 0.225, 7, None))
+periodic_table.append(Atom.Atom("Ne", "Neon", 0.225, 11, None))
+periodic_table.append(Atom.Atom("Na", "Sodium", 0.25, 1, None))
+periodic_table.append(Atom.Atom("Mg", "Magnesium", 0.25, 2, None))
+periodic_table.append(Atom.Atom("Al", "Aluminium", 0.25, 3, None))
+periodic_table.append(Atom.Atom("Si", "Silicon", 0.275, 3, None))
+periodic_table.append(Atom.Atom("P", "Phosphorus", 0.275, 12, None))
+periodic_table.append(Atom.Atom("S", "Sulfur", 0.275, 13, None))
+periodic_table.append(Atom.Atom("Cl", "Chlorine", 0.275, 3, None))
+periodic_table.append(Atom.Atom("Ar", "Argon", 0.3, 11, None))
+periodic_table.append(Atom.Atom("K", "Potassium", 0.3, 1, None))
+periodic_table.append(Atom.Atom("Ca", "Calcium", 0.3, 2, None))
+
+atom_list = []
+molecule_set = []
+molecule_set.append(Molecule.Molecule("O2", None, None, [periodic_table[7], periodic_table[7]], [
+    [0, 0, -0.75], [0, 0, 0.75]], [(0, 1, 1)], 1))
+molecule_set.append(Molecule.Molecule("H2O", None, None, [periodic_table[0], periodic_table[0], periodic_table[7]], [
+    [0, np.sqrt(3)-1, -1], [0, np.sqrt(3)-1, 1], [0, 1-np.sqrt(3), 0]], [(0, 2, 1), (1, 2, 1)], 2))
+molecule_set.append(Molecule.Molecule("C2H4", None, None,
+                                      [periodic_table[5], periodic_table[5], periodic_table[0],
+                                       periodic_table[0], periodic_table[0], periodic_table[0]],
+                                      [[0, 0, -0.75], [0, 0, 0.75], [0, 0.75*np.sqrt(4.5), -1.875], [0, -0.75 * np.sqrt(
+                                          4.5), -1.875], [0, 0.75*np.sqrt(4.5), 1.875], [0, -0.75 * np.sqrt(4.5), 1.875]],
+                                      [(0, 1, 2), (0, 2, 1), (0, 3, 1), (1, 4, 1), (1, 5, 1)], 6))
+molecule_set.append(Molecule.Molecule("C2H6", None, None,
+                                      [periodic_table[5], periodic_table[5], periodic_table[0],
+                                       periodic_table[0], periodic_table[0], periodic_table[0],
+                                       periodic_table[0], periodic_table[0]],
+                                      [[0, 0, -0.75], [0, 0, 0.75], [0, 0.75 *
+                                                                     np.sqrt(4.5), -1.875], [1.125, -1.125, -1.875],
+                                       [-1.125, -1.125, -1.875], [0, 0.75 *
+                                                                  np.sqrt(4.5), 1.875], [1.125, -1.125, 1.875],
+                                       [-1.125, -1.125, 1.875]],
+                                      [(0, 1, 1), (0, 2, 1), (0, 3, 1), (0, 4, 1), (1, 5, 1), (1, 6, 1), (1, 7, 1)], 7))
+molecule_list = []
+bar_list = []
+
 sphereI, sphereB = ObjLoader.load_model("models/sphere.obj")
 floorI, floorB = ObjLoader.load_model("models/floor.obj")
 barI, barB = ObjLoader.load_model("models/cube.obj")
@@ -353,9 +354,12 @@ lightPos = [25, 25, 25]
 cam = [(math.pi/4), (math.pi/4), 20]
 
 # VAO and VBO
-VAO = glGenVertexArrays(100)
-VBO = glGenBuffers(100)
+VAO = glGenVertexArrays(3)
+VBO = glGenBuffers(3)
 VIndex = 0
+sphereIndex = bindArrays(sphereB)
+floorIndex = bindArrays(floorB)
+barIndex = bindArrays(barB)
 
 side_pos = []
 side_pos.append([0, -5, 0])
@@ -376,7 +380,7 @@ side_rotate.append([(np.pi/2)*3, 0, 0])
 side_scale = [0.2, 0.2, 0.2]
 
 for i in range(6):
-    objectList.append(Object.Object(bindArrays(floorB), len(floorI), "Floor", i,
+    objectList.append(Object.Object(floorIndex, len(floorI), "Floor", i,
                       side_pos[i], side_rotate[i], side_scale, [0, 0, 0], 19, True))
 
 marker_pos = []
@@ -392,7 +396,7 @@ marker_pos.append([5, 5, 5])
 marker_scale = [0.1, 0.1, 0.1]
 
 for i in range(8):
-    objectList.append(Object.Object(bindArrays(sphereB), len(sphereI), "Marker", i,
+    objectList.append(Object.Object(sphereIndex, len(sphereI), "Marker", i,
                                     marker_pos[i], [0, 0, 0], marker_scale, [0, 0, 0], 18, True))
 
 projection = pyrr.matrix44.create_perspective_projection_matrix(
@@ -418,6 +422,7 @@ while not glfw.window_should_close(window):
     nbFrames += 1
     if currentTime-lastTime >= 1.0:
         print(1000/nbFrames, "ms/frame")
+        print("VIndex: ", VIndex)
         nbFrames = 0
         lastTime += 1.0
 
