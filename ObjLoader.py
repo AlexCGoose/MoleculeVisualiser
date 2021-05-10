@@ -4,7 +4,6 @@ import numpy as np
 class ObjLoader:
     buffer = []
 
-    @staticmethod
     def search_data(data_values, coordinates, skip, data_type):
         for d in data_values:
             if d == skip:
@@ -14,7 +13,6 @@ class ObjLoader:
             elif data_type == 'int':
                 coordinates.append(int(d)-1)
 
-    @staticmethod  # sorted vertex buffer for use with glDrawArrays function
     def create_sorted_vertex_buffer(indices_data, vertices, textures, normals):
         for i, ind in enumerate(indices_data):
             if i % 3 == 0:  # sort the vertex coordinates
@@ -30,7 +28,6 @@ class ObjLoader:
                 end = start + 3
                 ObjLoader.buffer.extend(normals[start:end])
 
-    @staticmethod  # TODO unsorted vertex buffer for use with glDrawElements function
     def create_unsorted_vertex_buffer(indices_data, vertices, textures, normals):
         num_verts = len(vertices) // 3
 
@@ -51,14 +48,12 @@ class ObjLoader:
 
                     break
 
-    @staticmethod
     def show_buffer_data(buffer):
         for i in range(len(buffer)//8):
             start = i * 8
             end = start + 8
             print(buffer[start:end])
 
-    @staticmethod
     def load_model(file, sorted=True):
         vert_coords = []  # will contain all the vertex coordinates
         tex_coords = []  # will contain all the texture coordinates
